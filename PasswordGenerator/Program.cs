@@ -15,7 +15,7 @@ internal class Program
             //if no arguments are given generate password 
             //min length 8 char
             //option for min char length 
-            //option to save password with given site
+            //option to save new password with given site
             return 0;
         });
         //Get
