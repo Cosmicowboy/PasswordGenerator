@@ -10,7 +10,8 @@ public class PasswordService
     private const string _specialPool = "!@#$%^&*()-_=+[]{}|;:,.<>?";
     private readonly List<string> _stringPools = [_lowerPool, _upperPool, _numberPool, _specialPool];
     private int _lastPoolSelection;
-    public string GeneratePassword(ushort minLength)
+    
+    public string GeneratePassword(int minLength)
     {
 
         var sBuilder = new StringBuilder();
