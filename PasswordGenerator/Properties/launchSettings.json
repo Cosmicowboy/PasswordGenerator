@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PasswordGenerator": {
+      "commandName": "Project",
+      "commandLineArgs": "--length 20"
+    }
+  }
+}

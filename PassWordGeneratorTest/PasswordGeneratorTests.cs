@@ -4,13 +4,13 @@ namespace PassWordGeneratorTest
 {
     public class PasswordGeneratorTests
     {
-       private PasswordService _pWordService = new();
+       private readonly PasswordService _pWordService = new();
         [Fact]
         public void PasswordMinLength()
         {
             var rnd = new Random();
             
-            var minLength = rnd.Next(100);
+            var minLength = (byte)rnd.Next(100);
             var pWord = _pWordService.GeneratePassword(minLength);
 
             Assert.Equal(minLength, pWord.Length);

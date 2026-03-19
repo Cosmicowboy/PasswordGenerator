@@ -2,7 +2,7 @@
 
 namespace PasswordGenerator.Services;
 
-public class PasswordService
+public class PasswordService : IPasswordService
 {
     private const string _lowerPool = "abcdefghijklmnopqrstuvwxyz";
     private const string _upperPool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -11,7 +11,7 @@ public class PasswordService
     private readonly List<string> _stringPools = [_lowerPool, _upperPool, _numberPool, _specialPool];
     private int _lastPoolSelection;
     
-    public string GeneratePassword(int minLength = 8)
+    public string GeneratePassword(byte minLength = 8) 
     {
         if(minLength < 8)
         {
@@ -23,7 +23,7 @@ public class PasswordService
 
         var poolNum = rnd.Next(_stringPools.Count);
 
-        for (int i = 0; i < minLength; i++)
+        for (byte i = 0; i < minLength; i++)
         {
             //random number to get the pool
 
@@ -43,6 +43,11 @@ public class PasswordService
         // each draw is also a random num
 
         return sBuilder.ToString();
+    }
+
+    public string GetStoredPassword(string siteIdentifier)
+    {
+        throw new NotImplementedException();
     }
     //serialize passwords
     //deserialize passwords
