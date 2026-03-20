@@ -11,29 +11,48 @@ internal class Program
     static async Task<int> Main(string[] args)
     {
         ServiceCollection services = new();
-        services.AddSingleton<IPasswordService, PasswordService>();
+
+        services.AddScoped<IPasswordService, PasswordService>();
+        services.AddSingleton<IPasswordBank, PasswordBank>();
 
         using ServiceProvider provider = services.BuildServiceProvider();
 
-        //root command
-        // generates basic password and returns to user
         var rootCommand = new RootCommand("Password Bank CLI");
+        ParseResult parseResult = rootCommand.Parse(args);
 
-        Option<byte> minLength = new("--length", "--len", "-l")
+
+        var minLength = new Option<byte>("--length", "--len", "-l")
         {
-            Description = "Minimum length of the returned password (absolute min is 8 chars)"
+            Description = "Minimum length of the returned password (absolute min is 8 chars)",
+            DefaultValueFactory = parseResult => 8
+        };
+
+        //var saveArg = new Argument<string>("");
+        var savePassWord = new Option<string>("--save", "-s")
+        {
+            Description = "Option to save the generated password",
+            //need to pass argument for site here
         };
 
         rootCommand.Options.Add(minLength);
 
-        ParseResult parseResult = rootCommand.Parse(args);
-        
+        var getCmd = new Command("get", "Retrieves a password")
+        {
+            //fill out
+        };
+        var siteArg = new Argument<string>("site")
+        {
+            Description = "Identifier for site belonging to password"
+        };
+
+        getCmd.Arguments.Add(siteArg);
+
+        rootCommand.Subcommands.Add(getCmd);
+
         rootCommand.SetAction(parseResult =>
         {
             var pWordService = provider.GetService<IPasswordService>()!;
-            //if no arguments are given generate password 
-            //min length 8 char
-            //option for min char length 
+
             //option to save new password with given site
             var userRequestLength = parseResult.GetValue(minLength);
 
@@ -41,18 +60,24 @@ internal class Program
             return 0;
         });
 
-        //Get
-        var getCmd = new Command("--get", "Retrieves a password")
-        {
-            new Argument<string>("site")
-        };
 
         getCmd.SetAction((parseResult) =>
         {
-            // lookup logic
-            //var passWord = passwordServices.GetPassword();
-            //write to console
-            //write erros to Console.Error.WriteLine()
+            try
+            {
+
+                var pWordService = provider.GetService<IPasswordService>()!;
+                var siteIdentifier = parseResult.GetValue();
+
+                pWordService.GetStoredPassword(siteIdentifier);
+            }
+            catch(Exception ex)
+            {
+                //write erros to Console.Error.WriteLine()
+                Console.Error.WriteLine(ex.Message);
+                return 1;
+            }
+
             return 0;
         });
 
