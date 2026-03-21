@@ -35,14 +35,14 @@ internal class Program
         };
 
         rootCommand.Options.Add(minLength);
-
-        var getCmd = new Command("get", "Retrieves a password")
-        {
-            //fill out
-        };
         var siteArg = new Argument<string>("site")
         {
             Description = "Identifier for site belonging to password"
+        };
+
+        var getCmd = new Command("--get", "Retrieves a password")
+        {
+            
         };
 
         getCmd.Arguments.Add(siteArg);
@@ -65,15 +65,20 @@ internal class Program
         {
             try
             {
+                var siteIdentifier = parseResult.GetValue(siteArg);
+                if(siteIdentifier == null)
+                {
+                    throw new ArgumentNullException(siteIdentifier);
+                }
+
 
                 var pWordService = provider.GetService<IPasswordService>()!;
-                var siteIdentifier = parseResult.GetValue();
+                
 
-                pWordService.GetStoredPassword(siteIdentifier);
+                pWordService.GetStoredPassword(siteIdentifier!);
             }
             catch(Exception ex)
             {
-                //write erros to Console.Error.WriteLine()
                 Console.Error.WriteLine(ex.Message);
                 return 1;
             }
