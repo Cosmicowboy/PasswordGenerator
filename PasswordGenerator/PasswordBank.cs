@@ -33,12 +33,16 @@ namespace PasswordGenerator
         /// <param name="password"></param>
         public void SavePassword(string site, string password)
         {
-            var success = _passwordCache.TryAdd(site, password);
-
-            if (!success)
+            if(string.IsNullOrWhiteSpace(site))
             {
-                throw new ArgumentException("Site already contains a password, please try to update");
+                throw new ArgumentNullException(nameof(site));
             }
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                throw new ArgumentNullException(nameof(password));
+            }
+
+            _passwordCache.Add(site, password);
         }
     }
 }
