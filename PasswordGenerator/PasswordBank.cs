@@ -9,7 +9,7 @@ namespace PasswordGenerator
         /// <summary>
         /// Password bank Key -> site, Value -> password
         /// </summary>
-        private readonly Dictionary<string, string> _passwordCache = [];
+        private readonly Dictionary<string, string> _passwordCache = new();
         /// <summary>
         /// Returns a string of the password associated with the site or throws arugmetn exception
         /// </summary>

@@ -10,46 +10,50 @@ internal class Program
 {
     static async Task<int> Main(string[] args)
     {
+        using var provider = BuildServices();
+
+        var rootcmd = BuildRootCommand(provider);
+
+        ParseResult parseResult = rootcmd.Parse(args);
+
+        return parseResult.Invoke();
+    }
+
+    private static ServiceProvider BuildServices()
+    {
         ServiceCollection services = new();
 
         services.AddScoped<IPasswordService, PasswordService>();
         services.AddSingleton<IPasswordBank, PasswordBank>();
 
-        using ServiceProvider provider = services.BuildServiceProvider();
+        return services.BuildServiceProvider();
+    }
 
-        var rootCommand = new RootCommand("Password Bank CLI");
-        ParseResult parseResult = rootCommand.Parse(args);
+    private static RootCommand BuildRootCommand(ServiceProvider provider)
+    {
+        var root = new RootCommand("Password Bank CLI");
 
-
-        var minLength = new Option<byte>("--length", "--len", "-l")
+        var minLength = new Option<byte>("--length", aliases: ["--len", "-l"])
         {
             Description = "Minimum length of the returned password (absolute min is 8 chars)",
             DefaultValueFactory = parseResult => 8
         };
 
-        //var saveArg = new Argument<string>("");
         var savePassWord = new Option<string>("--save", "-s")
         {
             Description = "Option to save the generated password",
             //need to pass argument for site here
         };
 
-        rootCommand.Options.Add(minLength);
-        var siteArg = new Argument<string>("site")
-        {
-            Description = "Identifier for site belonging to password"
-        };
+        root.Options.Add(minLength);
+        root.Options.Add(savePassWord);
 
-        var getCmd = new Command("--get", "Retrieves a password")
-        {
-            
-        };
+        root.Subcommands.Add(BuildGetCommand(provider));
+        root.Subcommands.Add(BuildAddCommand(provider));
+        root.Subcommands.Add(BuildUpdateCommand(provider));
+        root.Subcommands.Add(BuildDeleteCommand(provider));
 
-        getCmd.Arguments.Add(siteArg);
-
-        rootCommand.Subcommands.Add(getCmd);
-
-        rootCommand.SetAction(parseResult =>
+        root.SetAction(parseResult =>
         {
             var pWordService = provider.GetService<IPasswordService>()!;
 
@@ -60,24 +64,37 @@ internal class Program
             return 0;
         });
 
+        return root;
+    }
 
+
+    private static Command BuildGetCommand(ServiceProvider provider)
+    {
+        var siteArg = new Argument<string>("site")
+        {
+            Description = "Identifier for site belonging to password"
+        };
+        var getCmd = new Command("--get", "Retrieves a password")
+        {
+
+        };
         getCmd.SetAction((parseResult) =>
         {
             try
             {
                 var siteIdentifier = parseResult.GetValue(siteArg);
-                if(siteIdentifier == null)
+                if (siteIdentifier == null)
                 {
                     throw new ArgumentNullException(siteIdentifier);
                 }
 
 
                 var pWordService = provider.GetService<IPasswordService>()!;
-                
 
-                pWordService.GetStoredPassword(siteIdentifier!);
+
+                Console.WriteLine(pWordService.GetStoredPassword(siteIdentifier!));
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.Error.WriteLine(ex.Message);
                 return 1;
@@ -85,9 +102,16 @@ internal class Program
 
             return 0;
         });
+        getCmd.Arguments.Add(siteArg);
+
+        return getCmd;
+    }
+    private static Command BuildAddCommand(ServiceProvider provider)
+    {
+
+        throw new NotImplementedException();
 
 
-        //Add
         var addCmd = new Command("--add", "Adds password to test bank")
         {
             new Argument<(string,string)>("siteValue")
@@ -97,12 +121,15 @@ internal class Program
         {
 
         });
-        //update 
-        //remove
-
-        return parseResult.Invoke();
     }
-
+    private static Command BuildUpdateCommand(ServiceProvider provider)
+    {
+        throw new NotImplementedException();
+    }
+    private static Command BuildDeleteCommand(ServiceProvider provider)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 /*

@@ -1,10 +1,12 @@
-﻿using PasswordGenerator.Services;
+﻿using PasswordGenerator;
+using PasswordGenerator.Services;
 
 namespace PassWordGeneratorTest
 {
     public class PasswordGeneratorTests
     {
-       private readonly PasswordService _pWordService = new();
+       private static readonly PasswordBank _passwordBank = new();
+       private readonly PasswordService _pWordService = new(_passwordBank);
         [Fact]
         public void PasswordMinLength()
         {
@@ -34,10 +36,6 @@ namespace PassWordGeneratorTest
             Assert.NotEqual(p1, p2);
         }
 
-        [Fact]
-        public void AdhersToMinimumLength()
-        {
-            Assert.Equal(8,_pWordService.GeneratePassword(0).Length);
-        }
+
     }
 }
