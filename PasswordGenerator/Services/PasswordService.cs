@@ -17,7 +17,7 @@ public class PasswordService : IPasswordService
         _passwordBank = passwordBank;
     }
 
-    public string GeneratePassword(byte minLength) 
+    public string GeneratePassword(byte minLength)
     {
 
         var sBuilder = new StringBuilder();
@@ -50,8 +50,13 @@ public class PasswordService : IPasswordService
     public string GetStoredPassword(string siteIdentifier)
     {
 
-            return _passwordBank.GetPassword(siteIdentifier);
+        return _passwordBank.GetPassword(siteIdentifier);
     }
+    public void StorePassword(string site, string password)
+    {
+        _passwordBank.SavePassword(site, password);
+    }
+
     //serialize passwords
     //deserialize passwords
 }
