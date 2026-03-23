@@ -17,6 +17,11 @@ public class PasswordService : IPasswordService
         _passwordBank = passwordBank;
     }
 
+    /// <summary>
+    /// Generate Random Password with minimum 8 char in length
+    /// </summary>
+    /// <param name="minLength"></param>
+    /// <returns></returns>
     public string GeneratePassword(byte minLength)
     {
 
@@ -27,8 +32,7 @@ public class PasswordService : IPasswordService
 
         for (byte i = 0; i < minLength; i++)
         {
-            //random number to get the pool
-
+            //Increase randomness by generating from a different pool
             while (poolNum == _lastPoolSelection)
             {
                 poolNum = rnd.Next(_stringPools.Count);
@@ -55,6 +59,10 @@ public class PasswordService : IPasswordService
     public void StorePassword(string site, string password)
     {
         _passwordBank.SavePassword(site, password);
+    }
+    public void DeleteStoredPassword(string siteIdentifier)
+    {
+        _passwordBank.DeletePassword();
     }
 
     //serialize passwords

@@ -39,17 +39,17 @@ internal class Program
             DefaultValueFactory = parseResult => 8
         };
 
-        var savePassWord = new Option<string>("--save", "-s")
+        var savePassword = new Option<string>("--save", aliases: ["-s"])
         {
             Description = "Save the generated password for the given site"
         };
 
         root.Options.Add(minLength);
-        root.Options.Add(savePassWord);
-        root.Subcommands.Add(BuildGetCommand(provider));
-        root.Subcommands.Add(BuildAddCommand(provider));
-        root.Subcommands.Add(BuildUpdateCommand(provider));
-        root.Subcommands.Add(BuildDeleteCommand(provider));
+        root.Options.Add(savePassword);
+        root.Subcommands.Add(GetPasswordCommand(provider));
+        root.Subcommands.Add(AddPasswordCommand(provider));
+        root.Subcommands.Add(UpdatePasswordCommand(provider));
+        root.Subcommands.Add(DeletePasswordCommand(provider));
 
         root.SetAction(parseResult =>
         {
@@ -60,19 +60,19 @@ internal class Program
                 var userRequestLength = parseResult.GetValue(minLength);
                 var siteToSave = parseResult.GetValue(savePassword);
 
-                var generated = pWordService.GeneratePassword(userRequestLength);
+                var generatedPassword = pWordService.GeneratePassword(userRequestLength);
                 if (siteToSave is not null)
                 {
-                    pWordService.StorePassword(siteToSave, generated);
-                    Console.WriteLine($"Saved password for site '{siteToSave}'.");
+                    pWordService.StorePassword(siteToSave, generatedPassword);
+                    Console.WriteLine($"Saved password : {generatedPassword} for site '{siteToSave}'");
                 }
                 else
                 {
-                    Console.WriteLine($"Generated Password: {generated}");
+                    Console.WriteLine($"Generated Password: {generatedPassword}");
                 }
                 return 0;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.Error.WriteLine(ex.Message);
                 return 1;
@@ -82,16 +82,19 @@ internal class Program
     }
 
 
-    private static Command BuildGetCommand(ServiceProvider provider)
+    private static Command GetPasswordCommand(ServiceProvider provider)
     {
         var siteArg = new Argument<string>("site")
         {
             Description = "Identifier for site belonging to password"
         };
-        var getCmd = new Command("--get", "Retrieves a password")
+        var getCmd = new Command("--get")
         {
-
+            Description = "Retrieves a password",
         };
+
+        getCmd.Arguments.Add(siteArg);
+
         getCmd.SetAction((parseResult) =>
         {
             try
@@ -105,8 +108,8 @@ internal class Program
 
                 var pWordService = provider.GetService<IPasswordService>()!;
 
-
-                Console.WriteLine(pWordService.GetStoredPassword(siteIdentifier!));
+                var returnedPassword = pWordService.GetStoredPassword(siteIdentifier!);
+                Console.WriteLine($"returned password : {returnedPassword}");
             }
             catch (Exception ex)
             {
@@ -116,18 +119,17 @@ internal class Program
 
             return 0;
         });
-        getCmd.Arguments.Add(siteArg);
 
         return getCmd;
     }
-    private static Command BuildAddCommand(ServiceProvider provider)
+    private static Command AddPasswordCommand(ServiceProvider provider)
     {
 
         var siteArg = new Argument<string>("siteValue");
         var passwordArg = new Argument<string>("passwordValue");
-        var addCmd = new Command("--add", "Adds password to test bank")
+        var addCmd = new Command("--add")
         {
-            
+            Description = "Adds password to test bank",
         };
 
         addCmd.Arguments.Add(siteArg);
@@ -152,45 +154,58 @@ internal class Program
                 }
                 throw new ArgumentNullException("Argument for saving password was left empty");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.Error.WriteLine(ex.Message);
                 return 1;
             }
-            
+
         });
         return addCmd;
     }
-    private static Command BuildUpdateCommand(ServiceProvider provider)
+    private static Command UpdatePasswordCommand(ServiceProvider provider)
     {
         throw new NotImplementedException();
         /*
-         * 
          * can either pass in site and password 
          *     - check bank against passed in site then update value
          * or can generate new password and update site with generated password
-         * 
-         * 
          */
     }
-    private static Command BuildDeleteCommand(ServiceProvider provider)
+    private static Command DeletePasswordCommand(ServiceProvider provider)
     {
-        throw new NotImplementedException();
-        /*
-         * 
-         * pass in site and delte if available
-         * 
-         */
+        var deleteArg = new Argument<string>("site")
+        {
+            Description = "Deletes teh password for the given site"
+        };
+        var deleteCmd = new Command("--delete")
+        {
+            Description = "Deltes Password for related site"
+        };
+
+        deleteCmd.SetAction((parseResult) =>
+        {
+            var siteIdentifier = parseResult.GetValue(deleteArg);
+            try
+            {
+                if (siteIdentifier == null)
+                {
+                    throw new ArgumentNullException(siteIdentifier);
+                }
+                var pWordService = provider.GetService<IPasswordService>()!;
+
+                pWordService.DeleteStoredPassword(siteIdentifier);
+
+                Console.WriteLine($"Delted: {siteIdentifier} from stored passwords");
+                return 0;
+            }
+            catch(Exception ex)
+            {
+                Console.Error.WriteLine($"Error removing {siteIdentifier} from stored passwords \n{ex.Message}");
+                return 1;
+            }
+        });
+
+        return deleteCmd;
     }
 }
-
-/*
- * 
- * command line password bank
- * create (either insert or generate new)
- *      -option to save generated password
- *      -argument for how long it needs to be
- * read (give site --> get password)
- * update (give site --> new password)
- * delete (give site --> delete)
- */

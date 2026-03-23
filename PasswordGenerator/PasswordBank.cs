@@ -10,6 +10,7 @@ namespace PasswordGenerator
         /// Password bank Key -> site, Value -> password
         /// </summary>
         private readonly Dictionary<string, string> _passwordCache = new();
+
         /// <summary>
         /// Returns a string of the password associated with the site or throws arugmetn exception
         /// </summary>
@@ -43,6 +44,26 @@ namespace PasswordGenerator
             }
 
             _passwordCache.Add(site, password);
+        }
+
+        /// <summary>
+        /// deletes password for correlated site
+        /// </summary>
+        /// <param name="site"></param>
+        /// <exception cref="NotImplementedException"></exception>
+        public void DeletePassword(string site)
+        {
+            if (string.IsNullOrWhiteSpace(site))
+            {
+                throw new ArgumentNullException(nameof(site));
+            }
+
+            if(!_passwordCache.TryGetValue(site, out var _))
+            {
+                throw new ArgumentException($"Site: {site} does not exist in bank");
+            }
+
+            _passwordCache.Remove(site);
         }
     }
 }
