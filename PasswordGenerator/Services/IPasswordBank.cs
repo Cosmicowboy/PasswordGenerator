@@ -1,4 +1,4 @@
-﻿namespace PasswordGenerator
+﻿namespace PasswordGenerator.Services
 {
     public interface IPasswordBank
     {

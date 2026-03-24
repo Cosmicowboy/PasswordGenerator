@@ -7,7 +7,7 @@ namespace PasswordGenerator.Services;
 public interface IPasswordService
 {
     void DeleteStoredPassword(string siteIdentifier);
-    string GeneratePassword(byte minLength);
+    string GeneratePassword(byte minLength = 8);
     string GetStoredPassword(string siteIdentifier);
     void StorePassword(string site, string passWord);
 }

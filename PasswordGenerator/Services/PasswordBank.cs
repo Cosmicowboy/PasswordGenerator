@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace PasswordGenerator
+﻿namespace PasswordGenerator.Services
 {
     public class PasswordBank : IPasswordBank
     {
@@ -19,7 +15,7 @@ namespace PasswordGenerator
         /// <exception cref="ArgumentException"></exception>
         public string GetPassword(string siteName)
         {
-            if(!_passwordCache.TryGetValue(siteName, out var passsWord))
+            if (!_passwordCache.TryGetValue(siteName, out var passsWord))
             {
                 throw new ArgumentException("Site does not exist in bank");
             }
@@ -34,7 +30,7 @@ namespace PasswordGenerator
         /// <param name="password"></param>
         public void SavePassword(string site, string password)
         {
-            if(string.IsNullOrWhiteSpace(site))
+            if (string.IsNullOrWhiteSpace(site))
             {
                 throw new ArgumentNullException(nameof(site));
             }
@@ -58,7 +54,7 @@ namespace PasswordGenerator
                 throw new ArgumentNullException(nameof(site));
             }
 
-            if(!_passwordCache.TryGetValue(site, out var _))
+            if (!_passwordCache.TryGetValue(site, out var _))
             {
                 throw new ArgumentException($"Site: {site} does not exist in bank");
             }

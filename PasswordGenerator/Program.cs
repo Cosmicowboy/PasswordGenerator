@@ -171,9 +171,17 @@ internal class Program
             Description = "identifier of the site stored with the password",
         };
 
-        //Generate as option not default behavior
+        //Generate as option should not be default behavior
         //this can avoid accidental overwrites with generated passwords
-        var generateOption = new Option<string>("--generate", aliases: ["-g", "-gen"]);
+        var generateOption = new Option<string>("--generate", aliases: ["-g", "-gen"])
+        {
+            DefaultValueFactory = result =>
+            {
+                var pWordService = provider.GetService<IPasswordService>()!;
+
+                return pWordService.GeneratePassword();
+            }
+        };
 
         var updateCmd = new Command("--update")
         {
@@ -182,12 +190,6 @@ internal class Program
 
         updateCmd.Arguments.Add(updateArg);
         updateCmd.Options.Add(generateOption);
-
-        /*
-         * can either pass in site and password 
-         *     - check bank against passed in site then update value
-         * or can generate new password and update site with generated password
-         */
 
         //TODO: add in logic for option to generate password
         updateCmd.SetAction((parseResult) =>
@@ -213,7 +215,6 @@ internal class Program
             }
 
         });
-
 
         return updateCmd;
     }

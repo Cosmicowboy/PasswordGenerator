@@ -1,7 +1,9 @@
-﻿using System.Text;
+﻿using System.Security.Cryptography;
+using System.Text;
 
 namespace PasswordGenerator.Services;
 
+//TODO: Update with RandomNumberGenerator.GetInt32(0,len)
 public class PasswordService : IPasswordService
 {
     private const string _lowerPool = "abcdefghijklmnopqrstuvwxyz";
@@ -26,27 +28,26 @@ public class PasswordService : IPasswordService
     {
 
         var sBuilder = new StringBuilder();
-        var rnd = new Random();
 
-        var poolNum = rnd.Next(_stringPools.Count);
+        var poolNum = RandomNumberGenerator.GetInt32(_stringPools.Count);
 
         for (byte i = 0; i < minLength; i++)
         {
             //Increase randomness by generating from a different pool
             while (poolNum == _lastPoolSelection)
             {
-                poolNum = rnd.Next(_stringPools.Count);
+                poolNum = RandomNumberGenerator.GetInt32(_stringPools.Count);
             }
             _lastPoolSelection = poolNum;
 
             var drawingPool = _stringPools[poolNum];
 
-            var currentChar = drawingPool[rnd.Next(drawingPool.Length)];
+            var currentChar = drawingPool[RandomNumberGenerator.GetInt32(drawingPool.Length)];
 
             sBuilder.Append(currentChar);
 
         }
-        // each draw is also a random num
+        // each draw is also a random int
 
         return sBuilder.ToString();
     }
@@ -62,7 +63,7 @@ public class PasswordService : IPasswordService
     }
     public void DeleteStoredPassword(string siteIdentifier)
     {
-        _passwordBank.DeletePassword();
+        _passwordBank.DeletePassword(siteIdentifier);
     }
 
     //serialize passwords

@@ -1,6 +1,6 @@
-﻿using PasswordGenerator;
+﻿using PasswordGenerator.Services;
 
-namespace PassWordGeneratorTest
+namespace PasswordServicesTest
 {
     public class PasswordBankTests
     {
