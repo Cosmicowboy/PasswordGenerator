@@ -2,7 +2,7 @@
 
 namespace PasswordGenerator.Services;
 
-public class PasswordService
+public class PasswordService : IPasswordService
 {
     private const string _lowerPool = "abcdefghijklmnopqrstuvwxyz";
     private const string _upperPool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -10,23 +10,29 @@ public class PasswordService
     private const string _specialPool = "!@#$%^&*()-_=+[]{}|;:,.<>?";
     private readonly List<string> _stringPools = [_lowerPool, _upperPool, _numberPool, _specialPool];
     private int _lastPoolSelection;
-    
-    public string GeneratePassword(int minLength = 8)
+    private IPasswordBank _passwordBank;
+
+    public PasswordService(IPasswordBank passwordBank)
     {
-        if(minLength < 8)
-        {
-            minLength = 8;
-        }
+        _passwordBank = passwordBank;
+    }
+
+    /// <summary>
+    /// Generate Random Password with minimum 8 char in length
+    /// </summary>
+    /// <param name="minLength"></param>
+    /// <returns></returns>
+    public string GeneratePassword(byte minLength)
+    {
 
         var sBuilder = new StringBuilder();
         var rnd = new Random();
 
         var poolNum = rnd.Next(_stringPools.Count);
 
-        for (int i = 0; i < minLength; i++)
+        for (byte i = 0; i < minLength; i++)
         {
-            //random number to get the pool
-
+            //Increase randomness by generating from a different pool
             while (poolNum == _lastPoolSelection)
             {
                 poolNum = rnd.Next(_stringPools.Count);
@@ -44,6 +50,21 @@ public class PasswordService
 
         return sBuilder.ToString();
     }
+
+    public string GetStoredPassword(string siteIdentifier)
+    {
+
+        return _passwordBank.GetPassword(siteIdentifier);
+    }
+    public void StorePassword(string site, string password)
+    {
+        _passwordBank.SavePassword(site, password);
+    }
+    public void DeleteStoredPassword(string siteIdentifier)
+    {
+        _passwordBank.DeletePassword();
+    }
+
     //serialize passwords
     //deserialize passwords
 }
