@@ -217,11 +217,12 @@ internal class Program
 
         return updateCmd;
     }
+
     private static Command DeletePasswordCommand(ServiceProvider provider)
     {
         var deleteArg = new Argument<string>("site")
         {
-            Description = "Deletes teh password for the given site"
+            Description = "Deletes the password for the given site"
         };
         var deleteCmd = new Command("--delete")
         {
