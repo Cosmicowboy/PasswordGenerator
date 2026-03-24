@@ -61,7 +61,7 @@ internal class Program
                 var siteToSave = parseResult.GetValue(savePassword);
 
                 var generatedPassword = pWordService.GeneratePassword(userRequestLength);
-                if (siteToSave is not null)
+                if (!string.IsNullOrWhiteSpace(siteToSave))
                 {
                     pWordService.StorePassword(siteToSave, generatedPassword);
                     Console.WriteLine($"Saved password : {generatedPassword} for site '{siteToSave}'");
@@ -145,14 +145,15 @@ internal class Program
                 var passwordId = parsedResult.GetValue(passwordArg);
 
                 var pWordService = provider.GetService<IPasswordService>()!;
-                if (!string.IsNullOrWhiteSpace(siteId) && !string.IsNullOrWhiteSpace(passwordId))
+                if (string.IsNullOrWhiteSpace(siteId) || string.IsNullOrWhiteSpace(passwordId))
                 {
-                    pWordService.StorePassword(siteId, passwordId);
-
-                    Console.WriteLine($"Password Saved to : {siteId}");
-                    return 0;
+                    throw new ArgumentException("Argument(s) for saving password were empty");
                 }
-                throw new ArgumentNullException("Argument for saving password was left empty");
+
+                pWordService.StorePassword(siteId, passwordId);
+                Console.WriteLine($"Password Saved to : {siteId}");
+
+                return 0;
             }
             catch (Exception ex)
             {
@@ -165,12 +166,56 @@ internal class Program
     }
     private static Command UpdatePasswordCommand(ServiceProvider provider)
     {
-        throw new NotImplementedException();
+        var updateArg = new Argument<string>("site")
+        {
+            Description = "identifier of the site stored with the password",
+        };
+
+        //Generate as option not default behavior
+        //this can avoid accidental overwrites with generated passwords
+        var generateOption = new Option<string>("--generate", aliases: ["-g", "-gen"]);
+
+        var updateCmd = new Command("--update")
+        {
+            Description = "updates the specified sites password"
+        };
+
+        updateCmd.Arguments.Add(updateArg);
+        updateCmd.Options.Add(generateOption);
+
         /*
          * can either pass in site and password 
          *     - check bank against passed in site then update value
          * or can generate new password and update site with generated password
          */
+
+        //TODO: add in logic for option to generate password
+        updateCmd.SetAction((parseResult) =>
+        {
+            try
+            {
+                var siteId = parseResult.GetValue(updateArg);
+
+                var pWordService = provider.GetService<IPasswordService>()!;
+
+                if (string.IsNullOrWhiteSpace(siteId))
+                {
+                    throw new ArgumentException($"Empty argument for {nameof(siteId)}");
+                }
+
+                Console.WriteLine($"Password for site: {siteId} was updated");
+                return 0;
+            }
+            catch(Exception ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+                return 1;
+            }
+
+        });
+
+
+        return updateCmd;
     }
     private static Command DeletePasswordCommand(ServiceProvider provider)
     {
@@ -199,7 +244,7 @@ internal class Program
                 Console.WriteLine($"Delted: {siteIdentifier} from stored passwords");
                 return 0;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.Error.WriteLine($"Error removing {siteIdentifier} from stored passwords \n{ex.Message}");
                 return 1;
