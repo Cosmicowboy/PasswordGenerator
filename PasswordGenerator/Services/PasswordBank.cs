@@ -68,5 +68,15 @@ namespace PasswordGenerator.Services
         {
             return JsonSerializer.Serialize(_passwordCache);
         }
+
+        public void Deserialize(string jsonString)
+        {
+            var storedPasswords = JsonSerializer.Deserialize<Dictionary<string, string>>(jsonString);
+
+            foreach(var kvp in storedPasswords!)
+            {
+                _passwordCache.Add(kvp.Key,kvp.Value);
+            }
+        }
     }
 }

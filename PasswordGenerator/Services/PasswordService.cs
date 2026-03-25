@@ -4,7 +4,6 @@ using System.Text.Json;
 
 namespace PasswordGenerator.Services;
 
-//TODO: Update with RandomNumberGenerator.GetInt32(0,len)
 public class PasswordService : IPasswordService
 {
     private const string _lowerPool = "abcdefghijklmnopqrstuvwxyz";
@@ -18,7 +17,7 @@ public class PasswordService : IPasswordService
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             "PasswordGenerator", "passwords.bin");
     private static readonly byte[] _entropy =
-        Encoding.UTF8.GetBytes();
+        Encoding.UTF8.GetBytes("7623C1309BFB21DF8F0B41ACC272657D4FD5D2271EBAED4BABDA127CE77F2A5D"); //randomly generated please generate your own before use
 
     public PasswordService(IPasswordBank passwordBank)
     {
@@ -53,7 +52,6 @@ public class PasswordService : IPasswordService
             sBuilder.Append(currentChar);
 
         }
-        // each draw is also a random int
 
         return sBuilder.ToString();
     }
@@ -71,9 +69,6 @@ public class PasswordService : IPasswordService
     {
         _passwordBank.DeletePassword(siteIdentifier);
     }
-
-    //should these two be in the bank class itself?
-    //only want one bank (singleton) while service class is scoped
     public void SavePasswords()
     {
         Directory.CreateDirectory(Path.GetDirectoryName(_storePath)!);
@@ -115,8 +110,6 @@ public class PasswordService : IPasswordService
 
         var jsonString = Encoding.UTF8.GetString(outBuffer);
 
-        //json -> dictionary 
-        //
+        _passwordBank.DeSerialize(jsonString);
     }
-
 }
