@@ -1,4 +1,6 @@
-﻿namespace PasswordGenerator.Services
+﻿using System.Text.Json;
+
+namespace PasswordGenerator.Services
 {
     public class PasswordBank : IPasswordBank
     {
@@ -60,6 +62,11 @@
             }
 
             _passwordCache.Remove(site);
+        }
+
+        public string Serialize()
+        {
+            return JsonSerializer.Serialize(_passwordCache);
         }
     }
 }

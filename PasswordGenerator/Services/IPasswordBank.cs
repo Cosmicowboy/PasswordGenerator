@@ -5,5 +5,7 @@
         void DeletePassword(string site);
         string GetPassword(string site);
         void SavePassword(string site, string password);
+
+        string Serialize();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 
 namespace PasswordGenerator.Services;
 
@@ -13,6 +14,11 @@ public class PasswordService : IPasswordService
     private readonly List<string> _stringPools = [_lowerPool, _upperPool, _numberPool, _specialPool];
     private int _lastPoolSelection;
     private IPasswordBank _passwordBank;
+    private static readonly string _storePath =
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "PasswordGenerator", "passwords.bin");
+    private static readonly byte[] _entropy =
+        Encoding.UTF8.GetBytes();
 
     public PasswordService(IPasswordBank passwordBank)
     {
@@ -66,6 +72,51 @@ public class PasswordService : IPasswordService
         _passwordBank.DeletePassword(siteIdentifier);
     }
 
-    //serialize passwords
-    //deserialize passwords
+    //should these two be in the bank class itself?
+    //only want one bank (singleton) while service class is scoped
+    public void SavePasswords()
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(_storePath)!);
+
+        var jsonPasswordsString = _passwordBank.Serialize();
+
+        byte[] data = Encoding.UTF8.GetBytes(jsonPasswordsString);
+
+        byte[] encrypted = ProtectedData.Protect(
+            data,
+            _entropy,
+            DataProtectionScope.CurrentUser);
+
+        File.WriteAllBytes(_storePath, encrypted);
+    }
+
+    public void DecryptData(byte[] entropy, DataProtectionScope scope, Stream s, int length)
+    {
+        ArgumentNullException.ThrowIfNull(s);
+        ArgumentNullException.ThrowIfNull(entropy);
+        if (length <= 0)
+            throw new ArgumentException("The given length was 0.", nameof(length));
+        if (entropy.Length <= 0)
+            throw new ArgumentException("The entropy length was 0.", nameof(entropy));
+
+        byte[] inBuffer = new byte[length];
+        byte[] outBuffer;
+
+        if (s.CanRead)
+        {
+            s.Read(inBuffer, 0, length);
+
+            outBuffer = ProtectedData.Unprotect(inBuffer, entropy, scope);
+        }
+        else
+        {
+            throw new IOException("Could not read the stream.");
+        }
+
+        var jsonString = Encoding.UTF8.GetString(outBuffer);
+
+        //json -> dictionary 
+        //
+    }
+
 }
