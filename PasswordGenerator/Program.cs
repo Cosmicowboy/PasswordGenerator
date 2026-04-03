@@ -80,8 +80,6 @@ internal class Program
         });
         return root;
     }
-
-
     private static Command GetPasswordCommand(ServiceProvider provider)
     {
         var siteArg = new Argument<string>("site")
@@ -218,7 +216,6 @@ internal class Program
 
         return updateCmd;
     }
-
     private static Command DeletePasswordCommand(ServiceProvider provider)
     {
         var deleteArg = new Argument<string>("site")

@@ -23,7 +23,6 @@ public class PasswordService : IPasswordService
     {
         _passwordBank = passwordBank;
     }
-
     /// <summary>
     /// Generate Random Password with minimum 8 char in length
     /// </summary>
@@ -56,6 +55,7 @@ public class PasswordService : IPasswordService
         return sBuilder.ToString();
     }
 
+
     public string GetStoredPassword(string siteIdentifier)
     {
 
@@ -69,6 +69,8 @@ public class PasswordService : IPasswordService
     {
         _passwordBank.DeletePassword(siteIdentifier);
     }
+
+
     public void SavePasswords()
     {
         Directory.CreateDirectory(Path.GetDirectoryName(_storePath)!);
@@ -84,7 +86,15 @@ public class PasswordService : IPasswordService
 
         File.WriteAllBytes(_storePath, encrypted);
     }
-
+    /// <summary>
+    /// Decrytps data from local file storing passwords and fills password bank
+    /// </summary>
+    /// <param name="entropy"></param>
+    /// <param name="scope"></param>
+    /// <param name="s"></param>
+    /// <param name="length"></param>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="IOException"></exception>
     public void DecryptData(byte[] entropy, DataProtectionScope scope, Stream s, int length)
     {
         ArgumentNullException.ThrowIfNull(s);

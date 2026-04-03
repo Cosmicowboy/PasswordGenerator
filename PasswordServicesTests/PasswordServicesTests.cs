@@ -34,6 +34,5 @@ namespace PassWordGeneratorTest
 
             Assert.NotEqual(p1, p2);
         }
-
     }
 }
